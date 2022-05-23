@@ -1,0 +1,3 @@
+# example code to set up cron scheduler on  raspberry pi
+# ! use crontab -e, this is just an example
+*/3 * * * * ~/tda-auth/check_tokens.py
