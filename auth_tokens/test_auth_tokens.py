@@ -1,8 +1,12 @@
+import json
 import os
 from pathlib import Path
 import unittest
 from auth_tokens import AuthService
 import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class TestAuthTokens(unittest.TestCase):
 
@@ -51,15 +55,8 @@ class TestAuthTokens(unittest.TestCase):
         os.remove(os.environ['TDA_REFRESH_STATUS_PATH'])
 
     def test_access_token_updates(self):
-        # generated from user oauth
-        refresh_token_payload = {
-            'headers': {
-                'Date': datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S %Z")
-            },
-            'data': {
-                'expires_in': 1800
-            }
-        }
+        # generated real from user oauth
+        refresh_token_payload = json.load(open(os.environ['TDA_REFRESH_PATH'], 'r'))
         AuthService(
             os.environ['CLIENT_ID'],
             refresh_token_payload,
@@ -67,16 +64,16 @@ class TestAuthTokens(unittest.TestCase):
             access_token_path=os.environ['TDA_ACCESS_TOKEN_PATH']
         ).handle_refresh_token()
 
-        refresh_status_file = open(os.environ['TDA_ACCESS_TOKEN_PATH'], "r").read()
-        self.assertEqual(refresh_status_file > 0, False)
+        access_token_payload = json.load(open(os.environ['TDA_ACCESS_TOKEN_PATH'], "r"))
+        self.assertIs(access_token_payload['data']['refresh_token'])
         os.remove(os.environ['TDA_ACCESS_TOKEN_PATH'])
 
-
-    def test_access_token_passes(self):
-        # generated from user oauth
+    def test_access_token_passes_no_updates(self):
+        # get real token in order to test this
+                # generated from user oauth
         refresh_token_payload = {
             'headers': {
-                'Date': datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S %Z")
+                'Date': 'Wed Jan 25 2017 16:00:00 GMT'
             },
             'data': {
                 'expires_in': 1800
