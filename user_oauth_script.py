@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 import requests as req
 import json
-import datetime
+from datetime import datetime
 import pymongo
 
 load_dotenv()
@@ -12,6 +12,8 @@ def main(client_id):
     if client_id == "":
         print("client_id is not set")
         exit(1)
+    if not "@AMER.OAUTHAP" in client_id:
+        client_id += "@AMER.OAUTHAP"
 
     auth_url = generate_secure_signin_url(client_id)
     print('\nSecurely login to the tda account')
@@ -22,12 +24,14 @@ def main(client_id):
     code = getQueryParam(redirected_url_with_code, 'code')
     code_decoded = unquote(code)
     access_token_resp = get_refresh_token(code_decoded, client_id)
+    
+    # validate the token payload is the expected interface
     token_data_validation(access_token_resp)
-    refresh_date = parse_date_response(access_token_resp['headers']['Date'])
-    client = pymongo.MongoClient(os.environ['MONGO_URI'])
-    mongo_collection_token = client['coral']['toke']
-    mongo_collection_token.update_one({}, {"$set": {'refresh_origin': refresh_date, 'refresh_until': access_token_resp['data']['refresh_token_expires_in'] }})
-    dict_to_jsonfile(access_token_resp, 'tda-auth/refresh_token_resp.json')
+
+    # write refresh token to file
+    with open('tda-auth/refresh_token_resp.json', 'w') as f:
+        f.write(json.dumps(access_token_resp, indent=4))
+
     print('\nrefresh_token_resp.json saved and databased as well')
 
 
@@ -88,10 +92,6 @@ def token_data_validation(token_data):
         raise Exception("Access token expiration had a system change")
 
     return
-
-def dict_to_jsonfile(data_dict, filename):
-    with open(filename, 'w') as f:
-        f.write(json.dumps(data_dict, indent=4))
 
 '''
 TDA prereq is to get a new refresh token which expires in 90 days.

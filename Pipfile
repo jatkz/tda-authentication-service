@@ -5,8 +5,8 @@ name = "pypi"
 
 [packages]
 requests = "*"
-pymongo = {extras = ["srv"], version = "*"}
 python-dotenv = "*"
+datetime = "*"
 
 [dev-packages]
 
