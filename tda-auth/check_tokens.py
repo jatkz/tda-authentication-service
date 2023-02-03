@@ -23,9 +23,9 @@ class AuthService:
         expiration_in_seconds = (refresh_token_expiration_date - datetime.now()).total_seconds()
 
         refresh_status_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "refresh_status")
-        refresh_status = open(refresh_status_file_path, "w")
-        token_file.write(expiration_in_seconds)
-        token_file.close()
+        refresh_status_file = open(refresh_status_file_path, "w")
+        refresh_status_file.write(expiration_in_seconds)
+        refresh_status_file.close()
 
         if expiration_in_seconds < 0:
             exit(1)
@@ -37,14 +37,14 @@ class AuthService:
         if Path(access_json_path).is_file():
             latest_token_payload = read_json_file(access_json_path)
         else:
-            latest_token_payload = refresh_token_payload
+            latest_token_payload = self.refresh_token_payload
 
         access_token_expiration_date = parse_date_response(latest_token_payload['headers']['Date']) + timedelta(seconds=latest_token_payload['data']['expires_in'])
         expiration_in_seconds = (access_token_expiration_date - datetime.now()).total_seconds()
 
         # if expiration is in less than 5 minutes
         if expiration_in_seconds < 300:
-            new_token_data = fetch_access_token(refresh_token_payload['data']['refresh_token'], self.client_id)
+            new_token_data = fetch_access_token(latest_token_payload['data']['refresh_token'], self.client_id)
             access_token_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "access_token_resp.json")
             token_file = open(access_token_file_path, "w")
             token_file.write(new_token_data)
