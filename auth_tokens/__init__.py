@@ -3,47 +3,51 @@ import json
 import requests as req
 from datetime import datetime
 from datetime import timedelta
-import logging
 from pathlib import Path
 
 class AuthService:
-    def __init__(self, refresh_token_payload, client_id):
+    def __init__(self, 
+        refresh_token_payload, 
+        client_id,
+        refresh_status_path,
+        access_token_path
+        ):
         self.refresh_token_payload = refresh_token_payload
         self.client_id = client_id
+        self.refresh_status_path = refresh_status_path
+        self.access_token_path = access_token_path
 
     def handle(self):
-        self.handle_refresh_token()
+        if self.handle_refresh_token_status():
+            return
         self.handle_access_token()
 
-    def handle_refresh_token(self):
+    def handle_refresh_token_status(self):
         refresh_token_expiration_date = parse_date_response(self.refresh_token_payload['headers']['Date']) + timedelta(seconds=self.refresh_token_payload['data']['refresh_token_expires_in'])
         expiration_in_seconds = (refresh_token_expiration_date - datetime.now()).total_seconds()
 
-        refresh_status_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "refresh_status")
-        refresh_status_file = open(refresh_status_file_path, "w")
+        refresh_status_file = open(self.refresh_status_path, "w")
         refresh_status_file.write(expiration_in_seconds)
         refresh_status_file.close()
 
-        if expiration_in_seconds < 0:
-            exit(1)
+        return expiration_in_seconds > 0
 
 
     def handle_access_token(self):
-        access_json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'access_token_resp.json')
         # check expiration based which token payload
-        if Path(access_json_path).is_file():
-            latest_token_payload = read_json_file(access_json_path)
+        if Path(self.access_token_path).is_file():
+            latest_token_payload = read_json_file(self.access_token_path)
         else:
             latest_token_payload = self.refresh_token_payload
 
+        # check expiration
         access_token_expiration_date = parse_date_response(latest_token_payload['headers']['Date']) + timedelta(seconds=latest_token_payload['data']['expires_in'])
         expiration_in_seconds = (access_token_expiration_date - datetime.now()).total_seconds()
 
-        # if expiration is in less than 5 minutes
+        # if expiration
         if expiration_in_seconds < 300:
             new_token_data = fetch_access_token(latest_token_payload['data']['refresh_token'], self.client_id)
-            access_token_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "access_token_resp.json")
-            token_file = open(access_token_file_path, "w")
+            token_file = open(self.access_token_file_path, "w")
             token_file.write(new_token_data)
             token_file.close()
 
@@ -75,18 +79,3 @@ def fetch_access_token(refresh_token, client_id):
         "headers": headers,
         "data": resp
     }
-
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        log_file_path = os.path.join(dir_path, "error_access_token.log")
-        log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        dt_fmt = '%m/%d/%Y %I:%M:%S %p'
-        logging.basicConfig(filename=log_file_path, filemode='w', level=logging.INFO, format=log_fmt, datefmt=dt_fmt)
-        logging.error(type(e))
-        logging.error(e.args)
-        logging.error(e)

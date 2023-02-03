@@ -1,11 +1,6 @@
 from urllib.parse import urlencode, urlparse, parse_qs, unquote
-from dotenv import load_dotenv
-import os
 import requests as req
 import json
-from datetime import datetime
-
-load_dotenv()
 
 class UserOAuthService():
     def __init__(self, client_id) -> None:
