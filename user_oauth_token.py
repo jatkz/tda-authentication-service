@@ -10,4 +10,4 @@ if __name__ == "__main__":
     if (not 'CLIENT_ID' in os.environ) or (not 'TDA_OUTPUT_PATH'):
         print('Environment vars CLIENT_ID and TDA_OUTPUT_PATH required.')
         exit()
-    UserOAuthService(client_id=os.environ['CLIENT_ID']).auth(output=os.environ['TDA_REFRESH_PATH'])
+    UserOAuthService(client_id=os.environ['CLIENT_ID']).auth(output=os.environ['TDA_REFRESH_TOKEN_PATH'])
