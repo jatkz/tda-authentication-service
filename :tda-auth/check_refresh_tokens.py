@@ -1,16 +1,10 @@
-#!/usr/bin/env python
-
 import os
 import logging
 from reauth import read_json_file, AuthService
 from dotenv import load_dotenv
 
-try:
-    load_dotenv()
-    load_dotenv(os.environ["DOTENV_PATH"])
-except KeyError:
-    print("No dotenv file found. Continuing...")
-    pass
+load_dotenv()
+load_dotenv(os.environ["DOTENV_PATH"])
 
 
 def main():
@@ -27,7 +21,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-        print("Complete.")
     except Exception as e:
         dir_path = os.path.dirname(os.path.realpath(__file__))
         log_file_path = os.path.join(dir_path, "error_access_token.log")

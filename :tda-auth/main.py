@@ -16,7 +16,6 @@ class AuthService:
         self.access_token_path = access_token_path
         self.client_id = client_id
         self.refresh_status_path = refresh_status_path
-        print("AuthService initialized.")
 
     def handle(self):
         self.handle_refresh_token_status()
@@ -29,13 +28,10 @@ class AuthService:
         with open(self.refresh_status_path, "w", encoding="utf-8") as f:
             f.write(str(expiration_in_seconds))
 
-        print(f"Refresh token expires in {expiration_in_seconds} seconds. \n")
-
     def handle_access_token(self):
         new_token_data = fetch_access_token(self.refresh_token, self.client_id)
         with open(self.access_token_path, "w", encoding="utf-8") as f:
             f.write(json.dumps(new_token_data, indent=4))
-            print("Access token updated.\n")
 
     def get_expiration_in_seconds(self):
         date_creation = parse_date_response(self.refresh_date)
@@ -71,7 +67,4 @@ def fetch_access_token(refresh_token, client_id):
     r = req.post("https://api.tdameritrade.com/v1/oauth2/token", data=payload)
     headers = dict(r.headers)
     resp = r.json()
-    if r.status_code >= 400:
-        print("Error with refresh token request. \n")
-        raise Exception(resp)
     return {"headers": headers, "data": resp}
