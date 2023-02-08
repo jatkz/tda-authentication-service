@@ -29,12 +29,12 @@ SSH into PI and run following commands to install dependencies and contab schedu
 pip install requests;
 pip install datetime;
 
-crontab -e;
+sudo nano /etc/crontab;
 ```
 
 Inside the crontab enter cron expression following this pattern:
 ```
-*/20 8-22 * * 1-5 python ~/home/jt/check_refresh_tokens.py
+*/20 8-22 * * 1-5 <user> python ~/home/<user>/check_refresh_tokens.py > /home/<user>/cron.log 2>&1
 ```
 
 The following ENV variables are required and you can add them to /etc/profile
