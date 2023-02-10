@@ -2,6 +2,8 @@
 
 Set up in order to automate getting your personal credentials for the td-ameritrade api access. Contains scripts for deploying to a raspberry-pi server. This will only expose the temporary access token to the machine the script is hosted on.
 
+There are two steps involved in getting access to td ameritrade's api. First get the refresh token through the Oauth script. Note the refresh token expires in 90 days. The second script uses the refresh token to get an access token which expires in 30 minutes.  
+
 # Setting up
 
 In order to install dependencies you will need pipenv installed:
