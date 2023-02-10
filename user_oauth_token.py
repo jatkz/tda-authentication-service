@@ -1,5 +1,5 @@
 import os
-from user_oauth import UserOAuthService
+from oauth import UserOAuthService
 
 '''
 TDA prereq is to get a new refresh token which expires in 90 days.
