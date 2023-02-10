@@ -6,7 +6,7 @@ There are two steps involved in getting access to td ameritrade's api. First get
 
 # Setting up
 
-In order to install dependencies you will need pipenv installed:
+In order to install dependencies you can use pipenv:
 `pip install pipenv`
 
 After successful installation:
